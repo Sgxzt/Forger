@@ -1,77 +1,120 @@
-//Lisen the message that comes from popup.js with the configs
 browser.runtime.onMessage.addListener((mensaje) => {
   if (mensaje.action === "iniciarEscaneo") {
-    const tiempoInicio = performance.now(); // -- count the time exactly
-
+    const tiempoInicio = performance.now();
     const opciones = mensaje.opciones;
-    let textoPagina = document.body.innerText;
+    const textoPagina = document.body.innerText;
+    const htmlPagina = document.documentElement.innerHTML; // For Detecting Hiding Technologies
 
-    // Save finding in this unique list
-    let palabrasFinales = [];
+    // Inteligent Structure Sorting  v1.4v
+    // In this update some const and lines were moved and organised
+    const clasificacion = {
+      empresas: [],
+      productos: [],
+      ubicaciones: [],
+      fechas: [],
+      correos: [],
+      dominios: [],
+      acronimos: [],
+      usuarios: [],
+      tecnologias: []
+    };
 
-    //1. Email filter IF ACTIVE
-    if (opciones.correos) {
-      //Regular expresion standart for email capturing
-      const correosEncontrados = textoPagina.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g);
-      if (correosEncontrados) palabrasFinales = palabrasFinales.concat(correosEncontrados);
-    }
+    // 1. Advanced Regex Extraction (emails and domains)
+    const emails = textoPagina.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+    clasificacion.correos = [...new Set(emails.map(e => e.toLowerCase()))];
 
-    //2. URls filter IF ACTIVE
-    if (opciones.urls) {
-      //Regular expression for url capturing
-      const urlsEncontradas = textoPagina.match(/https?:\/\/[^\s]+|www\.[^\s]+/g);
-      if (urlsEncontradas) palabrasFinales = palabrasFinales.concat(urlsEncontradas);
-    }
+    const dominiosDetectados = textoPagina.match(/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,30}[a-z]/g) || [];
+    clasificacion.dominios = [...new Set(dominiosDetectados.map(d => d.toLowerCase()).filter(d => !d.includes('@')))];
 
-    //3. Standart words and number extraction
-    // If numbers is false we use regex without 0-9
-    const patronRegex = opciones.numeros ? /[a-zA-Z0-9áéíóúüñ_-]+/g : /[a-zA-Záéíóúüñ_-]+/g;
-    const palabrasNormales = textoPagina.match(patronRegex);
+    // 2. Process individuals words using heuristic
+    const todasLasPalabras = textoPagina.match(/[a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ_-]+/g) || [];
 
-    if (palabrasNormales) {
-      // Filter for more than 3 characters
-      const filtradasPorLongitud = palabrasNormales.filter(p => p.length > 3);
-      palabrasFinales = palabrasFinales.concat(filtradasPorLongitud);
-    }
+    // Local Dictionary
+    const palabrasUbicaciones = ['madrid', 'barcelona', 'london', 'paris', 'tokyo', 'miami', 'mexico', 'bogota', 'lima', 'santiago', 'valencia', 'sevilla'];
+    const palabrasProductos = ['sentinel', 'guardian', 'protect', 'platform', 'suite', 'software', 'firewall', 'antivirus', 'scanner', 'cloud'];
+    const palabrasTecnologias = ['wordpress', 'apache', 'nginx', 'docker', 'kubernetes', 'react', 'angular', 'php', 'python', 'node', 'mysql', 'aws', 'azure'];
 
-    //4. LowerCase filter IF active transforms all the list
-    if (opciones.minusculas) {
-      palabrasFinales = palabrasFinales.map(p => p.toLowerCase());
-    }
+    todasLasPalabras.forEach(palabra => {
+      const palabraMinuscula = palabra.toLowerCase();
 
-    //5. Delete Duplicates
-    const totalEncontradas = palabrasFinales.length;
-    let listaUnica = [...new Set(palabrasFinales)];
+      // Acronyms length bypass (2 - 5)
+      if (/^[A-ZÑÁÉÍÓÚÜ]{2,5}$/.test(palabra)) {
+        clasificacion.acronimos.push(palabra);
+        return; 
+      }
 
-    //6. Filter alfabetic order IF ACTIVE
-    if (opciones.ordenar) {
-      listaUnica.sort();
-    }
+      // General length filter for the rest common categories
+      if (palabra.length <= 3) return;
 
-    //Stadistics Content
-    const totalUnicas = listaUnica.length; 
-    const totalEliminadas = totalEncontradas - totalUnicas;
+      // Sort by dates
+      if (/^(19|20)\d{2}$/.test(palabra)) {
+        clasificacion.fechas.push(palabra);
+        return;
+      }
 
-    //Calculate the timer 
+      // Sort locations
+        if (palabrasUbicaciones.includes(palabraMinuscula)) {
+        clasificacion.ubicaciones.push(opciones.minusculas ? palabraMinuscula : palabra);
+        return;
+      }
+
+      // Sort products
+      if (palabrasProductos.includes(palabraMinuscula)) {
+        clasificacion.productos.push(opciones.minusculas ? palabraMinuscula : palabra);
+        return;
+      }
+
+      // Sort technologies
+        if (palabrasTecnologias.includes(palabraMinuscula)) {
+        clasificacion.tecnologias.push(palabraMinuscula);
+        return;
+      }
+
+      // Detect possible usernames
+      if (/^(admin|root|guest|user|support|test|info|sys|manager)$/.test(palabraMinuscula) || /^[a-z]{3,8}\d{1,4}$/.test(palabraMinuscula)) {
+        clasificacion.usuarios.push(palabraMinuscula);
+        return;
+      }
+
+      // Basis Heuristic in common texts
+      if (/^[A-Z][a-z0-9ñáéíóúü]{3,15}$/.test(palabra) && !opciones.minusculas) {
+        if (!palabrasUbicaciones.includes(palabraMinuscula) && !palabrasProductos.includes(palabraMinuscula)) {
+          clasificacion.empresas.push(palabra);
+        }
+      }
+    });
+
+    // 3. Sort dupes and optional sorting by categories
+    Object.keys(clasificacion).forEach(categoria => {
+      let listaUnica = [...new Set(clasificacion[categoria])];
+      if (opciones.ordenar) {
+        listaUnica.sort();
+      }
+      clasificacion[categoria] = listaUnica;
+    });
+
+    // 4. Compress the dictionary and unify
+    const todasLasKeywords = Object.values(clasificacion).flat();
+    let diccionarioTotal = [...new Set(todasLasKeywords)];
+    if (opciones.ordenar) diccionarioTotal.sort();
+
+    // 5. Final step of rendering and sending
     const tiempoTotal = ((performance.now() - tiempoInicio) / 1000).toFixed(2);
-    const dominioActual = window.location.hostname; // This gets the domain
+    const dominioActual = window.location.hostname;
 
-    //7. Send background to donwload
-    if (totalUnicas > 0) {
-       browser.runtime.sendMessage({
-          action: "abrirDashboard",
-          datos: { 
-            lista: listaUnica.join("\n"),
-            dominio: dominioActual,
-            encontradas: totalEncontradas,
-            unicas: totalUnicas,
-            eliminadas: totalEliminadas,
-            tiempo: tiempoTotal
-          }
-        });
+    if (diccionarioTotal.length > 0) {
+      browser.runtime.sendMessage({
+        action: "abrirDashboard",
+        datos: {
+          lista: diccionarioTotal.join("\n"),
+          dominio: dominioActual,
+          tiempo: tiempoTotal,
+          categorizado: clasificacion, 
+          totalUnicas: diccionarioTotal.length
+        }
+      });
     } else {
       alert("No elements found with the current filters");
     }
   }
 });
-

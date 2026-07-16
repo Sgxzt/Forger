@@ -2,17 +2,26 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Forge v1.3 - Statistic Dashboard</title>
+  <title>Forge v1.4v - Intelligent Dashboard</title>
   <style>
-    body { background-color: #0d1117; color: #c9d1d9; font-family: 'Courier New', Courier, monospace; padding: 40px; margin: 0; }
-    .panel { max-width: 600px; margin: 0 auto; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    body { background-color: #0d1117; color: #c9d1d9; font-family: 'Courier New', Courier, monospace; padding: 30px; margin: 0; }
+    .panel { max-width: 900px; margin: 0 auto; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
     h1 { color: #58a6ff; margin-top: 0; font-size: 24px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
     .status { color: #7ee787; font-weight: bold; margin-bottom: 15px; }
-    .metric { margin: 10px 0; font-size: 16px; display: flex; justify-content: space-between; }
-    .metric span { color: #f0f6fc; }
+    .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; background: #21262d; padding: 15px; border-radius: 4px; border: 1px solid #30363d; }
+    .meta-item { font-size: 14px; }
+    .meta-item span { color: #f0f6fc; font-weight: bold; }
     .progress-container { margin: 20px 0; background: #21262d; border-radius: 4px; padding: 5px; border: 1px solid #30363d; }
     .progress-text { margin-bottom: 5px; color: #8b949e; }
-    .btn-group { display: flex; gap: 15px; margin-top: 25px; }
+    
+    /* Cuadrícula de Entidades Clasificadas */
+    .entities-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+    .card { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; }
+    .card-title { color: #ff7b72; font-weight: bold; font-size: 14px; border-bottom: 1px solid #21262d; padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .card-title span { color: #8b949e; font-size: 12px; }
+    .card-content { font-size: 12px; color: #8b949e; white-space: pre-wrap; max-height: 80px; overflow-y: auto; }
+    
+    .btn-group { display: flex; gap: 15px; margin-top: 30px; }
     button { flex: 1; padding: 12px; font-family: inherit; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; font-size: 14px; }
     .btn-export { background: #238636; color: white; }
     .btn-export:hover { background: #2ea043; }
@@ -24,24 +33,37 @@
 <body>
 
   <div class="panel">
-    <h1>Forge v1.3 - Statistic Dashboard</h1>
+    <h1>Forge v1.4v - Intelligent Extraction Dashboard</h1>
     
     <div id="pantallaCarga">
-      <div class="progress-text">Analyzing DOM structure and processing text strings...</div>
+      <div class="progress-text">Executing NER heuristic engines and sorting intelligence groups...</div>
       <div class="progress-container" id="barraProgreso">[////////////////        ] 45%</div>
     </div>
 
     <div id="pantallaResultados" class="hidden">
-      <div class="status">✓ Analysis completed successfully.</div>
-      <div class="metric">Target Domain: <span id="lblDominio">example.com</span></div>
-      <div class="metric">Words Found: <span id="lblEncontradas">0</span></div>
-      <div class="metric">Unique Keywords: <span id="lblUnicas">0</span></div>
-      <div class="metric">Duplicate Items Removed: <span id="lblEliminadas">0</span></div>
-      <div class="metric">Analysis Time: <span id="lblTiempo">0s</span></div>
-      <div class="metric">Total Dictionary Size: <span id="lblTamaño">0 words</span></div>
+      <div class="status">✓ AI-Heuristic Analysis completed. Target categorized perfectly.</div>
+      
+      <div class="meta-grid">
+        <div class="meta-item">Domain: <span id="lblDominio">-</span></div>
+        <div class="meta-item">Time: <span id="lblTiempo">-</span></div>
+        <div class="meta-item">Total Words: <span id="lblTamaño">-</span></div>
+      </div>
+
+      <!-- Bloques de visualización de Clasificación -->
+      <div class="entities-grid">
+        <div class="card"><div class="card-title">Companies <span id="countEmpresas">0</span></div><div class="card-content" id="boxEmpresas">None</div></div>
+        <div class="card"><div class="card-title">Products <span id="countProductos">0</span></div><div class="card-content" id="boxProductos">None</div></div>
+        <div class="card"><div class="card-title">Locations <span id="countUbicaciones">0</span></div><div class="card-content" id="boxUbicaciones">None</div></div>
+        <div class="card"><div class="card-title">Acronyms (Bypass) <span id="countAcronimos">0</span></div><div class="card-content" id="boxAcronimos">None</div></div>
+        <div class="card"><div class="card-title">Emails <span id="countCorreos">0</span></div><div class="card-content" id="boxCorreos">None</div></div>
+        <div class="card"><div class="card-title">Subdomains/Domains <span id="countDominios">0</span></div><div class="card-content" id="boxDominios">None</div></div>
+        <div class="card"><div class="card-title">Target Dates <span id="countFechas">0</span></div><div class="card-content" id="boxFechas">None</div></div>
+        <div class="card"><div class="card-title">Potential Users <span id="countUsuarios">0</span></div><div class="card-content" id="boxUsuarios">None</div></div>
+        <div class="card"><div class="card-title">Technologies/CMS <span id="countTecnologias">0</span></div><div class="card-content" id="boxTecnologias">None</div></div>
+      </div>
       
       <div class="btn-group">
-        <button class="btn-export" id="btnExportar">Export TXT Dictionary</button>
+        <button class="btn-export" id="btnExportar">Export Full RockYou Dictionary</button>
         <button class="btn-retry" id="btnCerrar">Analyze New Target</button>
       </div>
     </div>
@@ -50,3 +72,4 @@
   <script src="dashboard.js"></script>
 </body>
 </html>
+
