@@ -1,6 +1,8 @@
 //Lisen the message that comes from popup.js with the configs
 browser.runtime.onMessage.addListener((mensaje) => {
   if (mensaje.action === "iniciarEscaneo") {
+    const tiempoInicio = performance.now(); // -- count the time exactly
+
     const opciones = mensaje.opciones;
     let textoPagina = document.body.innerText;
 
@@ -38,21 +40,37 @@ browser.runtime.onMessage.addListener((mensaje) => {
     }
 
     //5. Delete Duplicates
+    const totalEncontradas = palabrasFinales.length;
     let listaUnica = [...new Set(palabrasFinales)];
 
     //6. Filter alfabetic order IF ACTIVE
-    if (opciones.ordenar) { // ¡Corregido el paréntesis de apertura!
+    if (opciones.ordenar) {
       listaUnica.sort();
     }
 
+    //Stadistics Content
+    const totalUnicas = listaUnica.length; 
+    const totalEliminadas = totalEncontradas - totalUnicas;
+
+    //Calculate the timer 
+    const tiempoTotal = ((performance.now() - tiempoInicio) / 1000).toFixed(2);
+    const dominioActual = window.location.hostname; // This gets the domain
+
     //7. Send background to donwload
-    if (listaUnica.length > 0) { // ¡Corregido length!
+    if (totalUnicas > 0) {
        browser.runtime.sendMessage({
-          action: "descargarLista",
-          texto: listaUnica.join("\n")
+          action: "abrirDashboard",
+          datos: { 
+            lista: listaUnica.join("\n"),
+            dominio: dominioActual,
+            encontradas: totalEncontradas,
+            unicas: totalUnicas,
+            eliminadas: totalEliminadas,
+            tiempo: tiempoTotal
+          }
         });
     } else {
-      alert("No elements found with the current filters"); // ¡Corregido el punto y coma!
+      alert("No elements found with the current filters");
     }
   }
 });

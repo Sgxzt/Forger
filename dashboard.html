@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Forge v1.3 - Statistic Dashboard</title>
+  <style>
+    body { background-color: #0d1117; color: #c9d1d9; font-family: 'Courier New', Courier, monospace; padding: 40px; margin: 0; }
+    .panel { max-width: 600px; margin: 0 auto; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    h1 { color: #58a6ff; margin-top: 0; font-size: 24px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+    .status { color: #7ee787; font-weight: bold; margin-bottom: 15px; }
+    .metric { margin: 10px 0; font-size: 16px; display: flex; justify-content: space-between; }
+    .metric span { color: #f0f6fc; }
+    .progress-container { margin: 20px 0; background: #21262d; border-radius: 4px; padding: 5px; border: 1px solid #30363d; }
+    .progress-text { margin-bottom: 5px; color: #8b949e; }
+    .btn-group { display: flex; gap: 15px; margin-top: 25px; }
+    button { flex: 1; padding: 12px; font-family: inherit; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; font-size: 14px; }
+    .btn-export { background: #238636; color: white; }
+    .btn-export:hover { background: #2ea043; }
+    .btn-retry { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+    .btn-retry:hover { background: #30363d; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="panel">
+    <h1>Forge v1.3 - Statistic Dashboard</h1>
+    
+    <div id="pantallaCarga">
+      <div class="progress-text">Analyzing DOM structure and processing text strings...</div>
+      <div class="progress-container" id="barraProgreso">[////////////////        ] 45%</div>
+    </div>
+
+    <div id="pantallaResultados" class="hidden">
+      <div class="status">✓ Analysis completed successfully.</div>
+      <div class="metric">Target Domain: <span id="lblDominio">example.com</span></div>
+      <div class="metric">Words Found: <span id="lblEncontradas">0</span></div>
+      <div class="metric">Unique Keywords: <span id="lblUnicas">0</span></div>
+      <div class="metric">Duplicate Items Removed: <span id="lblEliminadas">0</span></div>
+      <div class="metric">Analysis Time: <span id="lblTiempo">0s</span></div>
+      <div class="metric">Total Dictionary Size: <span id="lblTamaño">0 words</span></div>
+      
+      <div class="btn-group">
+        <button class="btn-export" id="btnExportar">Export TXT Dictionary</button>
+        <button class="btn-retry" id="btnCerrar">Analyze New Target</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
