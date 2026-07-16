@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Forger",
+  "version": "1.0",
+  "description": "Smart keyword list generator using web scrapping.",
+  "permissions": ["activeTab", "scripting", "downloads"],
+  "action": {
+    "default_title": "Generate List",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
