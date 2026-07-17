@@ -1,9 +1,17 @@
-browser.runtime.onMessage.addListener((mensaje) => {
+browser.runtime.onMessage.addListener(async (mensaje) => {
   if (mensaje.action === "iniciarEscaneo") {
     const tiempoInicio = performance.now();
     const opciones = mensaje.opciones;
     const textoPagina = document.body.innerText;
     const htmlPagina = document.documentElement.innerHTML; // For Detecting Hiding Technologies
+
+    // Initialize the filter engine before processing page words
+    try {
+      await globalThis.ForgeFilterEngine?.initialize?.("es");
+    } catch (error) {
+      // Preserve previous Forge behavior if a filter source cannot be loaded
+      console.error("Forge FilterEngine initialization failed:", error);
+    }
 
     // Inteligent Structure Sorting  v1.4v
     // In this update some const and lines were moved and organised
@@ -16,7 +24,9 @@ browser.runtime.onMessage.addListener((mensaje) => {
       dominios: [],
       acronimos: [],
       usuarios: [],
-      tecnologias: []
+      tecnologias: [],
+      //Temp solution for words that do not match a special category yet
+      contextuales: []
     };
 
     // 1. Advanced Regex Extraction (emails and domains)
@@ -36,6 +46,11 @@ browser.runtime.onMessage.addListener((mensaje) => {
 
     todasLasPalabras.forEach(palabra => {
       const palabraMinuscula = palabra.toLowerCase();
+
+      // Apply whitelist, blacklist and stopwords using the shared FilterEngine
+      if (globalThis.ForgeFilterEngine?.shouldIgnore?.(palabra)) {
+        return;
+      }
 
       // Acronyms length bypass (2 - 5)
       if (/^[A-ZÑÁÉÍÓÚÜ]{2,5}$/.test(palabra)) {
@@ -82,9 +97,13 @@ browser.runtime.onMessage.addListener((mensaje) => {
           clasificacion.empresas.push(palabra);
         }
       }
+      //Preserve valid words that were not categorized like (contextuales:) MUST REMAIN AS THE FINAL FALLBACK CLASSIFICATION
+      clasificacion.contextuales.push(
+        opciones.minusculas ? palabraMinuscula : palabra
+      );
     });
 
-    // 3. Sort dupes and optional sorting by categories
+    // 3. Sort dupes and optional sorting by categories 
     Object.keys(clasificacion).forEach(categoria => {
       let listaUnica = [...new Set(clasificacion[categoria])];
       if (opciones.ordenar) {

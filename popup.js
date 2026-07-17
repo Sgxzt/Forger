@@ -14,13 +14,27 @@ document.getElementById("btnEscanear").addEventListener("click", async () => {
   //3. Inject the scrapper and use the options
   await browser.scripting.executeScript({
     target: { tabId: tab.id },
-    files: ["scrapper.js"]
+    files: [
+      "engines/stopwordsManager.js",
+      "engines/blacklistManager.js",
+      "engines/whitelistManager.js",
+      "engines/filterEngine.js",
+      "scrapper.js"
+    ]
   });
 
-  //4. Send internal message to the page with the configuration choosed
-  browser.tabs.sendMessage(tab.id, { action: "iniciarEscaneo", opciones: options }); 
-
-  //Close the menu after click
-  window.close();
+   //4. Send internal message and wait until the analysis finshes
+   try {
+    await browser.tabs.sendMessage(tab.id, {
+      action: "iniciarEscaneo",
+      opciones: options
+    });
+   } catch (error) {
+    console.error("Forge scan failed:", error);
+    return;
+   }
+   //close de popup only after the scan has finished
+   window.close();
 });
+
 

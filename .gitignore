@@ -1,0 +1,7 @@
+# Local Forger output
+exports/
+testing/
+
+# Generated wordlists
+forger_keywords.txt
+forge_keywords.txt

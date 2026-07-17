@@ -1,0 +1,12 @@
+1. StopwordsManager
+2. BlacklistManager
+3. WhitelistManager
+4. EntityFactory
+5. ContextAnalyzer
+6. ScoreEngine
+7. EntityClassifier
+8. MetadataCollector
+9. MutationEngine
+10. DictionaryGenerator
+11. LearningEngine
+12. ProfileEngine
