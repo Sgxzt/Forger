@@ -19,6 +19,8 @@ document.getElementById("btnEscanear").addEventListener("click", async () => {
       "engines/blacklistManager.js",
       "engines/whitelistManager.js",
       "engines/filterEngine.js",
+      "engines/entityFactory.js",
+      "engines/entityStore.js",
       "scrapper.js"
     ]
   });

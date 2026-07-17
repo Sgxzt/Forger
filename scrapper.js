@@ -8,6 +8,7 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
     // Initialize the filter engine before processing page words
     try {
       await globalThis.ForgeFilterEngine?.initialize?.("es");
+      globalThis.ForgeEntityStore.clear();
     } catch (error) {
       // Preserve previous Forge behavior if a filter source cannot be loaded
       console.error("Forge FilterEngine initialization failed:", error);
@@ -26,8 +27,9 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
       usuarios: [],
       tecnologias: [],
       //Temp solution for words that do not match a special category yet
-      contextuales: []
+      contextuales: [],
     };
+
 
     // 1. Advanced Regex Extraction (emails and domains)
     const emails = textoPagina.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
@@ -97,6 +99,14 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
           clasificacion.empresas.push(palabra);
         }
       }
+
+      globalThis.ForgeEntityStore.register({
+        text: palabra,
+        type: "contextual",
+        source: "page_text",
+        confidence: 0.25
+      });
+
       //Preserve valid words that were not categorized like (contextuales:) MUST REMAIN AS THE FINAL FALLBACK CLASSIFICATION
       clasificacion.contextuales.push(
         opciones.minusculas ? palabraMinuscula : palabra
@@ -129,7 +139,9 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
           dominio: dominioActual,
           tiempo: tiempoTotal,
           categorizado: clasificacion, 
-          totalUnicas: diccionarioTotal.length
+          totalUnicas: diccionarioTotal.length,
+          //New Entities Module 
+          entities: globalThis.ForgeEntityStore.getAll()
         }
       });
     } else {

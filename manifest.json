@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Forger",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Smart keyword list generator using web scrapping.",
   "permissions": ["activeTab", "scripting", "downloads"],
   "action": {
