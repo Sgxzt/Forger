@@ -34,7 +34,8 @@
         type = "unknown",
         source = "page_text",
         context = null,
-        confidence = 0
+        confidence = 0,
+        reason = null
     } = {}) {
         if (!globalThis.ForgeEntityFactory) {
             throw new Error(
@@ -68,15 +69,23 @@
                 existingEntity.contexts.push(context);
             }
 
-            if (
-                existingEntity.type === "unknown" &&
-                type !== "unknown"
-            ) {
+            const hasStrongerEvidence =
+                type !== "unknown" &&
+                confidence > existingEntity.confidence;
+
+            if (hasStrongerEvidence) {
                 existingEntity.type = type;
+                existingEntity.confidence = confidence;
             }
 
-            if (confidence > existingEntity.confidence) {
-                existingEntity.confidence = confidence;
+            if (
+                reason &&
+                (
+                    !existingEntity.reason ||
+                    hasStrongerEvidence
+                )
+            )   {
+                existingEntity.reason = reason;
             }
 
             return existingEntity;
@@ -88,7 +97,8 @@
                 type,
                 confidence,
                 sources: source ? [source] : [],
-                contexts: context ? [context] : []
+                contexts: context ? [context] : [],
+                reason
             });
 
         entities.set(normalizedText, entity);

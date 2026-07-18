@@ -83,7 +83,21 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
 
       // Sort technologies
         if (palabrasTecnologias.includes(palabraMinuscula)) {
-        clasificacion.tecnologias.push(palabraMinuscula);
+        globalThis.ForgeEntityStore.register({
+          text: palabra,
+          type: "technology",
+          source: "page_text",
+          context: null,
+          confidence: 0.75,
+          reason: "technology_dictionary_match"
+        });
+
+        clasificacion.tecnologias.push(
+          opciones.minusculas
+          ? palabraMinuscula
+          : palabra
+        );
+
         return;
       }
 
@@ -132,6 +146,11 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
     const dominioActual = window.location.hostname;
 
     if (diccionarioTotal.length > 0) {
+      console.log (
+        "[FORGER] Entity Snapshot:",
+        globalThis.ForgeEntityStore.getAll()
+      );
+
       browser.runtime.sendMessage({
         action: "abrirDashboard",
         datos: {
