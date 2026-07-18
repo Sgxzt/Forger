@@ -20,6 +20,7 @@ document.getElementById("btnEscanear").addEventListener("click", async () => {
       "engines/whitelistManager.js",
       "engines/filterEngine.js",
       "engines/entityFactory.js",
+      "engines/contextAnalyzer.js",
       "engines/entityStore.js",
       "scrapper.js"
     ]

@@ -9,6 +9,78 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
     try {
       await globalThis.ForgeFilterEngine?.initialize?.("es");
       globalThis.ForgeEntityStore.clear();
+      
+      //TEMP LOG FROM HERE //////////////////
+      const headings = document.querySelectorAll("h1");
+
+      for (const heading of headings) {
+        console.log(
+          "[FORGER] Context Test:",
+          globalThis.ForgeContextAnalyzer.analyze(
+            heading,
+            heading.textContent
+          )
+        );
+      }
+
+      const contextObservations = 
+        globalThis.ForgeContextAnalyzer.collect();
+
+      console.log(
+        "[FORGER] Context observations:",
+        contextObservations
+      );
+      // TO HERE ////////////////////////////////
+
+      function observeContextTag({
+        tag,
+        confidence,
+        reason
+    }) {
+        const matchingObservations =
+            contextObservations.filter(
+                observation =>
+                    observation.element?.tagName
+                        ?.toLowerCase() === tag
+            );
+    
+        for (const observation of matchingObservations) {
+            const words =
+                observation.text
+                    .split(/\s+/)
+                    .map(word => word.trim())
+                    .filter(word => word.length >= 3);
+    
+            for (const word of words) {
+                globalThis.ForgeEntityStore.observe({
+                    text: word,
+                    element: observation.element,
+                    type: "contextual",
+                    confidence,
+                    reason
+                });
+            }
+        }
+    }
+    
+    observeContextTag({
+        tag: "title",
+        confidence: 0.45,
+        reason: "title_observation"
+    });
+    
+    observeContextTag({
+        tag: "h1",
+        confidence: 0.50,
+        reason: "heading_h1_observation"
+    });
+    
+    observeContextTag({
+        tag: "meta",
+        confidence: 0.60,
+        reason: "meta_observation"
+    });
+
     } catch (error) {
       // Preserve previous Forge behavior if a filter source cannot be loaded
       console.error("Forge FilterEngine initialization failed:", error);
@@ -146,10 +218,13 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
     const dominioActual = window.location.hostname;
 
     if (diccionarioTotal.length > 0) {
+
+      //TEMP LOG FROM HERE
       console.log (
         "[FORGER] Entity Snapshot:",
         globalThis.ForgeEntityStore.getAll()
       );
+      //TO HERE
 
       browser.runtime.sendMessage({
         action: "abrirDashboard",

@@ -106,6 +106,40 @@
         return entity;
     }
 
+    function observe({
+        text,
+        element = null,
+        type = "unknown",
+        confidence = 0,
+        reason = null
+    } = {}) {
+        let source = "page_text";
+        let context = null;
+
+        if (
+            globalThis.ForgeContextAnalyzer &&
+            typeof globalThis.ForgeContextAnalyzer.analyze === "function"
+        ) {
+            const analysis =
+                globalThis.ForgeContextAnalyzer.analyze(
+                    element,
+                    text
+                );
+
+                source = analysis.source || "page_text";
+                context = analysis.nearbyText || null;
+        }
+
+        return register({
+            text,
+            type,
+            source,
+            context,
+            confidence,
+            reason
+        });
+    }
+
     /**
      * Get one entity by text.
      *
@@ -149,6 +183,7 @@
     }
 
     globalThis.ForgeEntityStore = Object.freeze({
+        observe,
         register,
         get,
         getAll,
