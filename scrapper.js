@@ -46,10 +46,10 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
     
         for (const observation of matchingObservations) {
             const words =
-                observation.text
-                    .split(/\s+/)
-                    .map(word => word.trim())
-                    .filter(word => word.length >= 3);
+                globalThis.ForgeObservationCleaner.clean(
+                    observation.text
+                );
+                    
     
             for (const word of words) {
                 globalThis.ForgeEntityStore.observe({
@@ -79,6 +79,84 @@ browser.runtime.onMessage.addListener(async (mensaje) => {
         tag: "meta",
         confidence: 0.60,
         reason: "meta_observation"
+    });
+
+    observeContextTag({
+      tag: "h2",
+      confidence: 0.45,
+      reason: "heading_h2_observation"
+    });
+
+    observeContextTag({
+      tag: "button",
+      confidence: 0.35,
+      reason: "button_observation"
+    });
+
+    observeContextTag({
+      tag: "h3",
+      confidence: 0.40,
+      reason: "heading_h3_observation"
+    });
+
+    observeContextTag({
+      tag: "label",
+      confidence: 0.35,
+      reason: "label_observation"
+    });
+
+    observeContextTag({
+      tag: "input",
+      confidence: 0.40,
+      reason: "input_observation"
+    });
+
+    observeContextTag({
+      tag: "textarea",
+      confidence: 0.35,
+      reason: "textarea_observation"
+    });
+
+    observeContextTag({
+      tag: "a",
+      confidence: 0.35,
+      reason: "link_observation"
+    });
+
+    observeContextTag({
+      tag: "img",
+      confidence: 0.30,
+      reason: "image_observation"
+    });
+
+    observeContextTag({
+      tag: "script",
+      confidence: 0.55,
+      reason: "script_source_observation"
+    });
+
+    observeContextTag({
+      tag: "link",
+      confidence: 0.50,
+      reason: "link_resource_observation"
+    });
+
+    observeContextTag({
+      tag: "select",
+      confidence: 0.35,
+      reason: "select_observation"
+    });
+
+    observeContextTag({
+      tag: "option",
+      confidence: 0.35,
+      reason: "option_observation"
+    });
+
+    observeContextTag({
+      tag: "form",
+      confidence: 0.45,
+      reason: "form_observation"
     });
 
     } catch (error) {

@@ -21,6 +21,7 @@ document.getElementById("btnEscanear").addEventListener("click", async () => {
       "engines/filterEngine.js",
       "engines/entityFactory.js",
       "engines/contextAnalyzer.js",
+      "engines/observationCleaner.js",
       "engines/entityStore.js",
       "scrapper.js"
     ]

@@ -28,7 +28,13 @@
         "label",
         "input",
         "textarea",
-        "meta"
+        "meta",
+        "img",
+        "script",
+        "link",
+        "select",
+        "option",
+        "form"
     ]);
 
     function normalizeText(value) {
@@ -163,12 +169,20 @@
         const tag = getElementTag(element);
 
         if (tag === "input" || tag === "textarea") {
+            const safeValue =
+                tag === "input" &&
+                element.type?.toLowerCase() === "password"
+                    ? ""
+                    : element.value
             return normalizeText(
-                element.getAttribute("placeholder") ||
-                element.getAttribute("aria-label") ||
-                element.getAttribute("name") ||
-                element.value ||
-                ""
+                [
+                    element.getAttribute("placeholder"),
+                    element.getAttribute("aria-label") ,
+                    element.getAttribute("name"),
+                    safeValue 
+                ]
+                .filter(Boolean)
+                .join(" ")
             );
         }
 
@@ -177,6 +191,83 @@
                 element.getAttribute("content") || ""
             );
         }
+
+        if (tag === "img") {
+            return normalizeText(
+                [
+                    element.getAttribute("alt"),
+                    element.getAttribute("title"),
+                    element.getAttribute("aria-label")
+                ]
+                .filter(Boolean)
+                .join(" ")
+            );
+        }
+
+        if (tag === "script") {
+            return normalizeText(
+                [
+                    element.getAttribute("src"),
+                    element.getAttribute("type"),
+                    element.getAttribute("id")
+                ]
+                .filter(Boolean)
+                .join(" ")
+            );
+        }
+
+        if (tag === "link") {
+            return normalizeText(
+                [
+                    element.getAttribute("href"),
+                    element.getAttribute("rel"),
+                    element.getAttribute("type"),
+                    element.getAttribute("title")
+                ]
+                .filter(Boolean)
+                .join(" ")
+            );
+        }
+
+        if (tag === "select") {
+            return normalizeText(
+                [
+                    element.getAttribute("name"),
+                    element.getAttribute("id"),
+                    element.getAttribute("aria-label"),
+                    element.getAttribute("title")
+                ]
+                .filter(Boolean)
+                .join(" ")
+            );
+        }
+
+        if (tag === "option") {
+            return normalizeText(
+                [
+                    element.textContent,
+                    element.getAttribute("value"),
+                    element.getAttribute("label")
+                ]
+                .filter(Boolean)
+                .join(" ")
+            );
+        }
+
+        if (tag === "form") {
+            return normalizeText(
+                [
+                    element.getAttribute("name"),
+                    element.getAttribute("id"),
+                    element.getAttribute("action"),
+                    element.getAttribute("aria-label"),
+                    element.getAttribute("tlte")
+                ]
+                .filter(Boolean)
+                .join(" ")
+            );
+        }
+
         return normalizeText(
             element.innerText ||
             element.textContent ||
